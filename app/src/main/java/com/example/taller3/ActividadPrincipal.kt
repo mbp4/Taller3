@@ -2,9 +2,11 @@ package com.example.taller3
 
 
 import android.app.AlertDialog
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.provider.BaseColumns
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -47,14 +49,11 @@ class Inicio : ComponentActivity() {
 @Composable
 fun lectorNombre(context: Context) {
     val nombre = remember { mutableStateOf("") }
-    //creamos una variable que guarde el nombre del usuario
-
     val sharedPreferences = remember {
-        context.getSharedPreferences("BackgroundPrefs", Context.MODE_PRIVATE)
+        context.getSharedPreferences("UserData", Context.MODE_PRIVATE)
     }
     val savedColor = sharedPreferences.getInt("backgroundColor", android.graphics.Color.WHITE)
     val backgroundColor = remember { mutableStateOf(getComposeColor(savedColor)) }
-    //estas variables las utilizaremos para poder cambiar el color de fondo de la pantalla cuando se haga algun cambio en la activity de configuracion
 
     Column(
         modifier = Modifier
@@ -62,53 +61,87 @@ fun lectorNombre(context: Context) {
             .background(backgroundColor.value),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-        //utilizamos el modifier dentro de un column para poder centrar el contenido
     ) {
         TextField(
-            value = nombre.value, //cambiamos el valor del nombre por el introducido por el usuario
-            onValueChange = { nombre.value = it }, //actualizamos la variable para el nombre
+            value = nombre.value,
+            onValueChange = { nombre.value = it },
             label = { Text("Nombre") }
-            //creamos un textfield para que el usuario pueda introducir su nombre
         )
 
-        Spacer(modifier = Modifier.height(16.dp)) //damos una separacion
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = {
             with(sharedPreferences.edit()) {
                 putString("nombre", nombre.value)
                 apply()
-
-                context.startActivity(
-                    Intent(context, Inicio::class.java)
-                )
             }
         }) {
-            Text("Guardar")
+            Text("Guardar en base de datos")
         }
-        //con este boton guardamos el nombre y hacemos que la pagina se reinice para que el usuario vea el nombre que ha introducido
 
-        Spacer(modifier = Modifier.height(16.dp)) //damos un espacio
+        Spacer(modifier = Modifier.height(16.dp))
 
         val nombreGuardado = remember { sharedPreferences.getString("nombre", "") ?: "" }
-        //creamos una variable que guarde el nombre que ha guardado el usuario
+        Text("Bienvenido $nombreGuardado")
 
-        AndroidView(factory = { ctx ->
-            TextView(ctx).apply {
-                text = "Bienvenido $nombreGuardado"
-            }
-        })
+        Spacer(modifier = Modifier.height(16.dp))
 
-        //usamos AndroidView para poder mostrar el nombre que ha guardado el usuario haciendo uso del textView
+        BotonConfiguracion()
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(16.dp)) //damos un espacio
+        // Botón para guardar en SQLite
+        Button(onClick = {
+            guardarEnSQLite(context, nombre.value)
+        }) {
+            Text("Guardar en SQLite")
+        }
 
-        BotonConfiguracion() //llamamos a la funcion que crea el boton de configuracion
-
-        Spacer(modifier = Modifier.height(16.dp)) //damos un espacio
-
-        BotonRed() //llamamos a la funcion que realizara una tarea en segundo plano
+        // Botón para cargar desde SQLite
+        Button(onClick = {
+            cargarDeSQLite(context)
+        }) {
+            Text("Cargar desde SQLite")
+        }
     }
 }
+
+fun guardarEnSQLite(context: Context, nombre: String) {
+    val dbHelper = SQLDatos(context)
+    val db = dbHelper.writableDatabase
+
+    val values = ContentValues().apply {
+        put(SQLInicio.UserEntry.COLUMN_NAME_NOMBRE, nombre)
+    }
+
+    db?.insert(SQLInicio.UserEntry.TABLE_NAME, null, values)
+    Toast.makeText(context, "Guardado en SQLite", Toast.LENGTH_SHORT).show()
+}
+
+fun cargarDeSQLite(context: Context) {
+    val dbHelper = SQLDatos(context)
+    val db = dbHelper.readableDatabase
+
+    val projection = arrayOf(BaseColumns._ID, SQLInicio.UserEntry.COLUMN_NAME_NOMBRE)
+
+    val cursor = db.query(
+        SQLInicio.UserEntry.TABLE_NAME,
+        projection,
+        null,
+        null,
+        null,
+        null,
+        null
+    )
+
+    with(cursor) {
+        while (moveToNext()) {
+            val nombre = getString(getColumnIndexOrThrow(SQLInicio.UserEntry.COLUMN_NAME_NOMBRE))
+            Toast.makeText(context, "Cargado desde SQLite: $nombre", Toast.LENGTH_SHORT).show()
+        }
+    }
+    cursor.close()
+}
+
 
 @Preview(showBackground = true)
 @Composable
@@ -132,53 +165,4 @@ fun BotonConfiguracion() {
     }
 
     //creamos un boton que nos llevara a la pantalla de configuracion
-}
-
-@Composable
-fun BotonRed(){
-
-    val isLoading = remember { mutableStateOf(false) }
-    val progreso = remember { mutableStateOf(0f) }
-    val dialog = remember { mutableStateOf(false) }
-    //creamos variables que nos ayudaran a realizar la tarea en segundo plano
-
-    Spacer(modifier = Modifier.height(16.dp)) //damos un espacio
-
-    Button(onClick = {
-        isLoading.value = true //cambiamos el valor de la variable para que se muestre el progressbar circular
-        Thread{
-            //usamos un hebra para que se ejecute en segundo plano
-
-            for (i in 1..10) { //realizamos el proceso 10 veces
-                Thread.sleep(700) //hacemos que la hebra se detenga durante 700 milisegundos
-                progreso.value = i / 10f //cambiamos el valor del progreso para que se muestre el progressbar circular
-            }
-            isLoading.value = false
-            dialog.value = true
-            //cambiamos el valor de la variable para que se muestre el dialogo
-        }.start()
-
-        dialog.value = false
-        //cambiamos el valor de la variable para que el dialogo vuelva a su estado original y no se este mostrando continuamente
-    }) {
-        Text("Realizar comprobación de red")
-    }
-
-    if (isLoading.value) {
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("Comprobando red...")
-
-        Spacer(modifier = Modifier.height(16.dp))
-        CircularProgressIndicator(progress = progreso.value)
-        //mostramos el progressbar circular mientras se realiza la tarea en segundo plano en el caso de que se haya pulsado el boton de realizar comprobacion de red
-    }
-
-    if (dialog.value){
-        Toast.makeText(
-            LocalContext.current,
-            "Red estable",
-            Toast.LENGTH_SHORT
-        ).show()
-    }
-
 }

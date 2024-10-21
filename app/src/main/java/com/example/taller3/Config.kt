@@ -41,9 +41,9 @@ fun Preview2() {
 @Composable
 fun Configur() {
     val context = LocalContext.current
-    val preferences = context.getSharedPreferences("BackgroundPrefs", Context.MODE_PRIVATE)
+    val preferences = context.getSharedPreferences("UserData", Context.MODE_PRIVATE)
     val savedColor = preferences.getInt("backgroundColor", android.graphics.Color.WHITE)
-    val backgroundColor = remember { mutableStateOf(getComposeColor(savedColor)) } //variable que nos permite cambiar el color del fondo de la pantalla
+    val backgroundColor = remember { mutableStateOf(getComposeColor(savedColor)) }
 
     Column(
         modifier = Modifier
@@ -51,17 +51,14 @@ fun Configur() {
             .background(backgroundColor.value),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-        //utilizamos el modifier dentro de un column para poder centrar el contenido
     ) {
-
         Button(onClick = {
             context.startActivity(Intent(context, MainActivity::class.java))
         }) {
             Text("INICIO")
         }
-        //creamos un boton que nos llevara a la pantalla de inicio
 
-        Spacer(modifier = Modifier.height(16.dp)) //damos espacio
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = {
             backgroundColor.value = ComposeColor.White
@@ -69,9 +66,8 @@ fun Configur() {
         }) {
             Text("Blanco")
         }
-        //creamos un boton que cambie el color del fondo a blanco
 
-        Spacer(modifier = Modifier.height(16.dp)) //damos espacio
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = {
             backgroundColor.value = ComposeColor(0xFFaec6cf)
@@ -79,9 +75,8 @@ fun Configur() {
         }) {
             Text("Azul")
         }
-        //creamos un boton que cambie el color del fondo a azul
 
-        Spacer(modifier = Modifier.height(16.dp)) //damos espacio
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = {
             backgroundColor.value = ComposeColor(0xFFfdfd96)
@@ -89,9 +84,9 @@ fun Configur() {
         }) {
             Text("Amarillo")
         }
-        //creamos un boton que cambie el color del fondo a amarillo
     }
 }
+
 
 fun saveBackgroundColor(context: Context, color: Int) {
     val preferences = context.getSharedPreferences("BackgroundPrefs", Context.MODE_PRIVATE)
