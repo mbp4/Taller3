@@ -74,9 +74,10 @@ fun lectorNombre(context: Context) {
             with(sharedPreferences.edit()) {
                 putString("nombre", nombre.value)
                 apply()
+
             }
         }) {
-            Text("Guardar en base de datos")
+            Text("Guardar")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
