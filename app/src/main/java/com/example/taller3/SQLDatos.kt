@@ -27,4 +27,5 @@ class SQLDatos(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         db?.execSQL(SQL_DELETE_ENTRIES)
         onCreate(db)
     }
+
 }
