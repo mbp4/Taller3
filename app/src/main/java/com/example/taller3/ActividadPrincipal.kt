@@ -84,10 +84,11 @@ fun lectorNombre(context: Context) {
         Spacer(modifier = Modifier.height(16.dp))
 
         //val nombreGuardado = remember { sharedPreferences.getString("nombre", "") ?: "" }
-        Text("Bienvenido ${nombresBase.value}")
+        Text("Bienvenido")
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        Text("Nombres en la base de datos: ${nombresBase.value} ")
         BotonConfiguracion()
         Spacer(modifier = Modifier.height(16.dp))
     }
