@@ -1,6 +1,6 @@
 # Taller3
 
-link al repositorio: 
+link al repositorio: https://github.com/mbp4/Taller3.git 
  
 En el ejercicio propuesto se nos solicitaba realizar una aplicación en el entorno de desarrollo de Android Studio que proporcionase un saludo personalizado, la posibilidad de guardar el nombre del usuario, la posibilidad de cambiar el fondo de la aplicación, botones para navegar entre las pantallas y una base de datos. 
 
