@@ -42,9 +42,10 @@ fun Preview2() {
 fun Configur() {
     val context = LocalContext.current
     val preferences = context.getSharedPreferences("UserData", Context.MODE_PRIVATE)
+
+    // Aquí se obtiene el color guardado
     val savedColor = preferences.getInt("backgroundColor", android.graphics.Color.WHITE)
     val backgroundColor = remember { mutableStateOf(getComposeColor(savedColor)) }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -89,10 +90,9 @@ fun Configur() {
 
 
 fun saveBackgroundColor(context: Context, color: Int) {
-    val preferences = context.getSharedPreferences("BackgroundPrefs", Context.MODE_PRIVATE)
-
+    val preferences = context.getSharedPreferences("UserData", Context.MODE_PRIVATE)
     with(preferences.edit()) {
-        putInt("backgroundColor", color) //cambiamos el fondo y lo guardamos
-        apply() //aplicamos para que se cambie el color
+        putInt("backgroundColor", color) // Guardamos el color
+        apply() // Aplicamos los cambios
     }
 }

@@ -1,6 +1,7 @@
 package com.example.taller3
 
 import android.app.Activity.MODE_PRIVATE
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -51,8 +52,9 @@ class MainActivity : ComponentActivity() {
 fun Greeting(modifier: Modifier) {
 
     val context = LocalContext.current
-    val preferences = context.getSharedPreferences("BackgroundPrefs", MODE_PRIVATE)
+    val preferences = context.getSharedPreferences("UserData", Context.MODE_PRIVATE)
 
+    // Leer el color de fondo guardado
     val savedColor = preferences.getInt("backgroundColor", android.graphics.Color.WHITE)
     val backgroundColor = remember { mutableStateOf(getComposeColor(savedColor)) }
     //estas variables las utilizaremos para poder cambiar el color de fondo de la pantalla cuando se haga algun cambio en la activity de configuracion

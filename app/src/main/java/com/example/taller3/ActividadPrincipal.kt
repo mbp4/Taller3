@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.BaseColumns
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -39,13 +40,14 @@ class Inicio : ComponentActivity() {
     }
 }
 
+
 @Composable
 fun lectorNombre(context: Context) {
     val nombre = remember { mutableStateOf("") }
     val nombresBase = remember { mutableStateOf("") }
-    val sharedPreferences = remember {
-        context.getSharedPreferences("UserData", Context.MODE_PRIVATE)
-    }
+    val sharedPreferences = remember { context.getSharedPreferences("UserData", Context.MODE_PRIVATE) }
+
+    // Leer el color de fondo guardado
     val savedColor = sharedPreferences.getInt("backgroundColor", android.graphics.Color.WHITE)
     val backgroundColor = remember { mutableStateOf(getComposeColor(savedColor)) }
 
@@ -95,23 +97,31 @@ fun lectorNombre(context: Context) {
 }
 
 fun guardarEnSQLite(context: Context, nombre: String) {
-    val dbHelper = SQLDatos(context)
-    val db = dbHelper.writableDatabase
+    if (nombre.isNotEmpty()) {
+        val dbHelper = SQLDatos(context)
+        val db = dbHelper.writableDatabase
 
-    val values = ContentValues().apply {
-        put(SQLInicio.UserEntry.COLUMN_NAME_NOMBRE, nombre)
+        val values = ContentValues().apply {
+            put(SQLInicio.UserEntry.COLUMN_NAME_NOMBRE, nombre)
+        }
+
+        val newRowId = db.insert(SQLInicio.UserEntry.TABLE_NAME, null, values)
+        if (newRowId == -1L) {
+            Toast.makeText(context, "Error al guardar en SQLite", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Guardado en SQLite", Toast.LENGTH_SHORT).show()
+        }
+    } else {
+        Toast.makeText(context, "El nombre no puede estar vacío", Toast.LENGTH_SHORT).show()
     }
-
-    db?.insert(SQLInicio.UserEntry.TABLE_NAME, null, values)
-    Toast.makeText(context, "Guardado en SQLite", Toast.LENGTH_SHORT).show()
 }
+
 
 fun cargarDeSQLite(context: Context, nombresState: MutableState<String>) {
     val dbHelper = SQLDatos(context)
     val db = dbHelper.readableDatabase
 
     val projection = arrayOf(BaseColumns._ID, SQLInicio.UserEntry.COLUMN_NAME_NOMBRE)
-
     val cursor = db.query(
         SQLInicio.UserEntry.TABLE_NAME,
         projection,
@@ -123,17 +133,17 @@ fun cargarDeSQLite(context: Context, nombresState: MutableState<String>) {
     )
 
     val nombresList = mutableListOf<String>()
-
-    with(cursor) {
-        while (moveToNext()) {
-            val nombre = getString(getColumnIndexOrThrow(SQLInicio.UserEntry.COLUMN_NAME_NOMBRE))
+    cursor.use { // Utiliza 'use' para cerrar automáticamente el cursor
+        while (it.moveToNext()) {
+            val nombre = it.getString(it.getColumnIndexOrThrow(SQLInicio.UserEntry.COLUMN_NAME_NOMBRE))
             nombresList.add(nombre)
         }
     }
-    cursor.close()
 
-    nombresState.value = nombresList.joinToString(separator = "\n Bienvenido ")
+    nombresState.value = nombresList.joinToString(separator = "\n ")
 }
+
+
 
 
 @Preview(showBackground = true)
@@ -159,3 +169,4 @@ fun BotonConfiguracion() {
 
     //creamos un boton que nos llevara a la pantalla de configuracion
 }
+
