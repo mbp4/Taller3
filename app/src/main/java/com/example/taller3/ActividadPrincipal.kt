@@ -142,7 +142,7 @@ fun cargarDeSQLite(context: Context, nombresState: MutableState<String>) {
     }
     cursor.close()
 
-    nombresState.value = nombresList.joinToString(separator = "\n Bienvenido ")
+    nombresState.value = nombresList.joinToString(separator = "\n")
 }
 
 
