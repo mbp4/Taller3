@@ -8,7 +8,7 @@ import android.provider.BaseColumns
 class SQLDatos(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 2
         const val DATABASE_NAME = "UserData.db"
 
         private const val SQL_CREATE_ENTRIES =
