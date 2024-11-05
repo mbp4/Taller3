@@ -76,6 +76,7 @@ fun lectorNombre(context: Context) {
         // Botón para guardar en SQLite
         Button(onClick = {
             guardarEnSQLite(context, nombre.value)
+            nombre.value = ""
         }) {
             Text("Guardar en SQLite")
         }
